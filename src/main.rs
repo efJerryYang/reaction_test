@@ -20,7 +20,7 @@ include!(concat!(env!("OUT_DIR"), "/version.rs"));
 #[command(author, version, about, long_about = None)]
 struct Args {
     /// Number of rounds
-    #[arg(default_value_t = 3)]
+    #[arg(default_value_t = 5)]
     rounds: u32,
 }
 
