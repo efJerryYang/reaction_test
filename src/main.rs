@@ -103,7 +103,7 @@ impl DailyRecord {
         );
         let night = (
             NaiveTime::from_hms_opt(21, 0, 0).unwrap(),
-            NaiveTime::from_hms_opt(0, 0, 0).unwrap(),
+            NaiveTime::from_hms_opt(23, 59, 59).unwrap(),
         );
 
         if now >= midnight.0 && now < midnight.1 {
@@ -127,7 +127,7 @@ impl DailyRecord {
         } else if now >= dusk.0 && now < dusk.1 {
             self.dusk.push(attempt);
             Some("dusk".to_string())
-        } else if now >= night.0 && now < night.1 {
+        } else if now >= night.0 && now <= night.1 {
             self.night.push(attempt);
             Some("night".to_string())
         } else {
@@ -305,12 +305,12 @@ fn format_comparison(current_avg: f64, historical_avg: Option<f64>) -> String {
         let change = current_avg - avg;
         let change_percentage = (change / avg) * 100.0;
         let (avg_str, change_pct_str);
-        if change < 0.0 {
-            avg_str = format!("{:.2}ms", avg).bold().to_string();
-            change_pct_str = format!("↓{:.2}%", -change_percentage).green().to_string();
-        } else {
+        if change > 0.0 {
             avg_str = format!("{:.2}ms", avg).bold().to_string();
             change_pct_str = format!("↑{:.2}%", change_percentage).red().to_string();
+        } else {
+            avg_str = format!("{:.2}ms", avg).bold().to_string();
+            change_pct_str = format!("↓{:.2}%", -change_percentage).green().to_string();
         }
         format!("{} ({})", avg_str, change_pct_str)
     } else {
@@ -355,12 +355,22 @@ fn main() {
             }
 
             println!("Round {} of {}", round, args.rounds);
+            print!("Ready? [Enter] to start ");
+            io::stdout().flush().unwrap(); // Ensure the message is printed immediately
+            let mut input = String::new();
+            if let Ok(_) = io::stdin().read_line(&mut input) {
+                println!("Wait a second...");
+                thread::sleep(Duration::from_secs(1));
+            } else {
+                println!("Error reading input");
+                process::exit(1);
+            }
             println!("Get ready...");
             let delay = rand::thread_rng().gen_range(1000..10000); // Random delay between 1 to 8 seconds
             thread::sleep(Duration::from_millis(delay));
 
             let start = Instant::now();
-            print!("\nPress [Enter] now! ");
+            print!("{}", "\nPress [Enter] now!".bold());
             io::stdout().flush().unwrap(); // Ensure the message is printed immediately
 
             let mut input = String::new();
